@@ -1,0 +1,46 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/configure-pages@v5
+      - name: Build static index
+        run: |
+          mkdir -p _site/v1
+          cp index.html _site/
+          cp index.html _site/v1/index.html
+          cp src/versions.csv _site/versions.html
+          cp src/info/v1/info.json _site/v1/info.html
+          cp src/links/v1/providers.json _site/v1/links.html
+          python3 -m json.tool _site/v1/info.html >/dev/null
+          python3 -m json.tool _site/v1/links.html >/dev/null
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
