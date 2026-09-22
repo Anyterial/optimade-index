@@ -1,0 +1,5 @@
+# Internal rewrites preserve the OPTIMADE endpoint URLs while Netlify derives
+# each response's Content-Type from the typed source file.
+/v1/links  /src/links/v1/providers.json  200!
+/v1/info   /src/info/v1/info.json        200!
+/versions  /src/versions.csv             200!
